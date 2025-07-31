@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCSO Test Suite Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        h1 {
+            color: #444;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .formula-container {
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            color: #333;
+            border: 1px solid #ddd;
+            display: inline-block;
+        }
+        label {
+            font-weight: 500;
+            display: block;
+            margin-top: 20px;
+            color: #555;
+        }
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 8px auto;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            background-color: #f9f9f9;
+            display: block;
+        }
+        button {
+            margin: 25px auto;
+            padding: 14px;
+            width: 85%;
+            background: linear-gradient(to bottom, #666, #555);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #444;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sewing-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="Sewing Machine" width="90" height="90">
+        </div>
+        <h2>Sewing Combination Strength Optimization</h2>
+         
+        <div style="text-align: center;"></div>
+        <div class="formula-container" id="formulaDisplay">
+            <span class="math-symbol">→</span> 1, 2²
+        </div>
 
+        <label for="strength">Strength (t):</label>
+        <input type="number" id="strength" min="1" value="2" required oninput="updateFormula()">
+
+        <label for="numInputs">Number of Inputs :</label>
+        <input type="number" id="numInputs" min="1" value="2" required oninput="updateFormula()">
+
+        <label for="paramValue">Value of Parameter :</label>
+        <input type="number" id="paramValue" min="1" value="2" required oninput="updateFormula()">
+
+        <button onclick="submitForm()">Generate Test Suite</button>
+
+        <div class="result-container" id="result">
+            Awaiting input...
+        </div>
+    </div>
+
+    <script>
+        function updateFormula() {
+            const strength = document.getElementById("strength").value || 2;
+            const numInputs = document.getElementById("numInputs").value || 2;
+            const paramValue = document.getElementById("paramValue").value || 2;
+            
+            const formulaText = `${strength}, ${numInputs}<sup>${paramValue}</sup>`;
+            document.getElementById("formulaDisplay").innerHTML = formulaText;
+        }
+
+        async function submitForm() {
+            let strength = document.getElementById("strength").value;
+            let numInputs = document.getElementById("numInputs").value;
+            let paramValue = document.getElementById("paramValue").value;
+
+            if (!strength || !numInputs || !paramValue) {
+                document.getElementById("result").innerText = "Please fill in all fields.";
+                console.error("❌ [ERROR] Missing input fields.");
+                return;
+            }
+
+            // Update formula display one more time before submission
+            updateFormula();
+
+            let baseUrl = "https://congenial-broccoli-4jvgxxjqjw6h55rw-8080.app.github.dev/generate";
+            let params = `?strength=${encodeURIComponent(strength)}&numInputs=${encodeURIComponent(numInputs)}&paramValue=${encodeURIComponent(paramValue)}`;
+            let requestUrl = baseUrl + params;
+
+            console.log("🚀 [DEBUG] Sending request to:", requestUrl);
+
+            try {
+                const response = await fetch(requestUrl, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'text/plain' }
+                });
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    console.error("❌ [ERROR] Server returned:", response.status, errorText);
+                    throw new Error(`Server Error: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.text();
+                console.log("✅ [SUCCESS] Server response:", result);
+
+                document.getElementById("result").innerText = result;
+            } catch (error) {
+                console.error("❌ [ERROR] Fetch error:", error);
+                document.getElementById("result").innerText = "Error generating test suite: " + error.message;
+            }
+        }
+
+        // Initialize the formula display when page loads
+        document.addEventListener('DOMContentLoaded', updateFormula);
+    </script>
+</body>
+</html>
